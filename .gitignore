@@ -31,3 +31,6 @@ my_ccbert/uer/targets/code_changes_with_edits_all_pretrain_corpus.txt
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Environment / secrets (local credentials, never commit)
+.env

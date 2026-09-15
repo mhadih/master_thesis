@@ -1,4 +1,9 @@
+import os
+import sys
 import psycopg2
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.db_config import get_code_recorder_config
 
 # List of top student numbers (student_id from users table)
 top_students = ['810102398', '810102408', '810102541', '810102543', '810102427',
@@ -7,14 +12,8 @@ top_students = ['810102398', '810102408', '810102541', '810102543', '810102427',
                 '810102482', '810102483', '810102491', '810102494', '810102495',
                 '810102499', '810102550', '810102529']
 
-# Connect to PostgreSQL
-conn = psycopg2.connect(
-    dbname="code_recorder",
-    user="hadi",
-    password="***REMOVED***",
-    host="localhost",
-    port=5432
-)
+# Connect to PostgreSQL (parameters from environment variables / .env)
+conn = psycopg2.connect(**get_code_recorder_config())
 
 cur = conn.cursor()
 

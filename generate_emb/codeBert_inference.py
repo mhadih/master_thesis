@@ -8,13 +8,11 @@ from collections import defaultdict
 from tqdm import tqdm
 import json
 
-conn = psycopg2.connect(
-    dbname="code_recorder",
-    user="hadi",
-    password="***REMOVED***",
-    host="localhost",
-    port=5432
-)
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.db_config import get_code_recorder_config
+
+conn = psycopg2.connect(**get_code_recorder_config())
 
 query = """
     SELECT user_id, filename, content, date

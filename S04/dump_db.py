@@ -1,22 +1,15 @@
+import os
+import sys
 import psycopg2
 from tqdm import tqdm
 
-# --- Remote DB connection info ---
-REMOTE_CONFIG = {
-    'dbname': 'lmscore',
-    'user': 'postgres',
-    'password': '***REMOVED***',
-    'host': '2af95d8b-2d37-4feb-9925-9517d7905eb3.hsvc.ir',
-    'port': '31808'
-}
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.db_config import get_remote_config, get_s04_config
 
-LOCAL_CONFIG = {
-    "host": "localhost",
-    "port": 5432,
-    "dbname": "code_recorder_s04",
-    "user": "postgres",
-    "password": "***REMOVED***"
-}
+# --- Remote DB connection info (from environment variables / .env) ---
+REMOTE_CONFIG = get_remote_config()
+
+LOCAL_CONFIG = get_s04_config()
 
 # Tables to copy
 TABLES = ["UserAttributes"]

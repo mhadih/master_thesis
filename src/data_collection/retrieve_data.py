@@ -1,16 +1,15 @@
+import os
+import sys
 import psycopg2
 import pandas as pd
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.db_config import get_code_recorder_config
+
 assignment_phase = 3
 
-# Define your connection parameters
-conn = psycopg2.connect(
-    dbname="code_recorder",
-    user="hadi",
-    password="***REMOVED***",
-    host="localhost",
-    port=5432
-)
+# Connection parameters are read from environment variables / .env
+conn = psycopg2.connect(**get_code_recorder_config())
 
 query1 = """
     SELECT user_id, assignment, identifier 

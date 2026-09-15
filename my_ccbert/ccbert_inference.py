@@ -56,14 +56,13 @@ model.eval()
 
 print("✅ Model loaded successfully!")
 
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.db_config import get_code_recorder_config
+
 # Read from database
-conn = psycopg2.connect(
-    dbname="code_recorder",
-    user="hadi",
-    password="***REMOVED***",
-    host="localhost",
-    port=5432
-)
+conn = psycopg2.connect(**get_code_recorder_config())
 query = """
     SELECT user_id, filename, content, date
     FROM codetrace

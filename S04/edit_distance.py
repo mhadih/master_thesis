@@ -1,17 +1,16 @@
+import os
+import sys
 import psycopg2
 import pandas as pd
 import Levenshtein
 from tqdm import tqdm
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.db_config import get_s04_config
+
 result_filename = "student_mean_edit_distance_phase3.csv"
 
-conn = psycopg2.connect(
-    dbname="code_recorder_s04",
-    user="postgres",
-    password="***REMOVED***",
-    host="localhost",
-    port=5432
-)
+conn = psycopg2.connect(**get_s04_config())
 
 query = """
     SELECT 

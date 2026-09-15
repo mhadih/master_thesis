@@ -1,14 +1,13 @@
 import csv
+import os
+import sys
 import psycopg2
 
-# --- Database Connection Configuration ---
-db_config = {
-    'dbname': 'code_recorder',
-    'user': 'hadi',
-    'password': '***REMOVED***',
-    'host': 'localhost',
-    'port': '5432'
-}
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.db_config import get_code_recorder_config
+
+# --- Database Connection Configuration (from environment variables / .env) ---
+db_config = get_code_recorder_config()
 
 # --- Read CSV and collect student_ids ---
 input_csv_path = 'APS03_CA6_grades.csv'
