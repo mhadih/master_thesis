@@ -1,0 +1,42 @@
+from uer.utils.data import *
+from uer.utils.act_fun import *
+from uer.utils.optimizers import *
+from uer.utils.adversarial import *
+
+
+str2tokenizer = {"char": CharTokenizer, "space": SpaceTokenizer, "bert": BertTokenizer,
+                 "bpe": BPETokenizer, "xlmroberta": XLMRobertaTokenizer}
+str2dataset = {"bert": BertDataset, "lm": LmDataset, "mlm": MlmDataset,
+               "bilm": BilmDataset, "albert": AlbertDataset, "mt": MtDataset,
+               "t5": T5Dataset, "gsg": GsgDataset, "bart": BartDataset,
+               "cls": ClsDataset, "prefixlm": PrefixlmDataset, "edit":Mlm_Code_Change_and_Edit_Dataset}
+str2dataloader = {"bert": BertDataLoader, "lm": LmDataLoader, "mlm": MlmDataLoader,
+                  "bilm": BilmDataLoader, "albert": AlbertDataLoader, "mt": MtDataLoader,
+                  "t5": T5DataLoader, "gsg": GsgDataLoader, "bart": BartDataLoader,
+                  "cls": ClsDataLoader, "prefixlm": PrefixlmDataLoader, "edit":Mlm_Code_Change_and_Edit_DataLoader}
+
+str2act = {"gelu": gelu, "gelu_fast": gelu_fast, "relu": relu, "silu": silu, "linear": linear}
+
+str2optimizer = {"adamw": AdamW, "adafactor": Adafactor}
+
+str2scheduler = {"linear": get_linear_schedule_with_warmup, "cosine": get_cosine_schedule_with_warmup,
+                 "cosine_with_restarts": get_cosine_with_hard_restarts_schedule_with_warmup,
+                 "polynomial": get_polynomial_decay_schedule_with_warmup,
+                 "constant": get_constant_schedule, "constant_with_warmup": get_constant_schedule_with_warmup}
+
+str2adv = {"fgm": FGM, "pgd": PGD}
+
+__all__ = ["CharTokenizer", "SpaceTokenizer", "BertTokenizer", "BPETokenizer", "XLMRobertaTokenizer", "str2tokenizer",
+           "BertDataset", "LmDataset", "MlmDataset", "BilmDataset",
+           "AlbertDataset", "MtDataset", "T5Dataset", "GsgDataset",
+           "BartDataset", "ClsDataset", "PrefixlmDataset", "str2dataset",
+           "BertDataLoader", "LmDataLoader", "MlmDataLoader", "BilmDataLoader",
+           "AlbertDataLoader", "MtDataLoader", "T5DataLoader", "GsgDataLoader",
+           "BartDataLoader", "ClsDataLoader", "PrefixlmDataLoader", "str2dataloader",
+           "gelu", "gelu_fast", "relu", "silu", "linear", "str2act",
+           "AdamW", "Adafactor", "str2optimizer",
+           "get_linear_schedule_with_warmup", "get_cosine_schedule_with_warmup",
+           "get_cosine_with_hard_restarts_schedule_with_warmup",
+           "get_polynomial_decay_schedule_with_warmup",
+           "get_constant_schedule", "get_constant_schedule_with_warmup", "str2scheduler",
+           "FGM", "PGD", "str2adv"]
