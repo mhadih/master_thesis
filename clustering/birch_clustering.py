@@ -1,5 +1,6 @@
 from sklearn.cluster import Birch
 from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import normalize
 from sklearn.neighbors import NearestNeighbors
 import umap.umap_ as umap
 import numpy as np
@@ -47,16 +48,19 @@ for uid in user_ids:
 
 all_embeddings = np.array(embeddings)
 
-# Step 1: Reduce dimensions for clustering (to 10D for better structure)
-umap_reducer = umap.UMAP(n_components=NUMBER_OF_COMPONENTS, random_state=42)
+# Step 1: Reduce dimensions for clustering (to 50D for better structure)
+umap_reducer = umap.UMAP(n_components=NUMBER_OF_COMPONENTS, random_state=42, metric="cosine")
 emb_umap = umap_reducer.fit_transform(all_embeddings)
+emb_umap = normalize(emb_umap)  # L2-normalize, same input space as kmeans_clustering.py
     
 
 
 def find_best_birch_params(emb, threshold_values=None, n_clusters_values=None):
     if threshold_values is None:
-        # Reasonable default search space
-        threshold_values = np.linspace(0.3, 1.5, 10)
+        # Thresholds must fit the data scale. On the L2-normalized UMAP-50
+        # space pairwise distances are ~0.01-0.07: threshold 0.005 yields ~54
+        # subclusters, 0.03 yields ~2 (n=62). Interval [0.005, 0.025], step 0.0025.
+        threshold_values = np.arange(0.005, 0.0275, 0.0025)
     if n_clusters_values is None:
         # Try letting Birch decide, plus fixed numbers
         n_clusters_values = [4, 5, 6, 8, 10]
@@ -75,7 +79,7 @@ def find_best_birch_params(emb, threshold_values=None, n_clusters_values=None):
             if len(unique_labels) < 4:
                 continue
 
-            score = silhouette_score(emb, labels)
+            score = silhouette_score(emb, labels, metric="cosine")
             print(f"threshold={threshold:.3f}, n_clusters={n_clusters}, silhouette_score={score:.4f}")
 
             if score > best_score:
@@ -91,6 +95,12 @@ def find_best_birch_params(emb, threshold_values=None, n_clusters_values=None):
 best_params, best_score, best_labels, best_k = find_best_birch_params(emb_umap)
 print("Best params (threshold, n_clusters):", best_params, "with silhouette score:", best_score)
 
+if best_labels is None:
+    raise RuntimeError(
+        "BIRCH grid found no valid clustering (every config gave < 4 clusters). "
+        "Widen/extend threshold_values to fit your embedding scale."
+    )
+
 # Step 3: Re-project to 2D using UMAP for visualization
 umap_2d = umap.UMAP(n_components=2, random_state=42)
 emb_umap_2d = umap_2d.fit_transform(all_embeddings)
@@ -99,7 +109,7 @@ emb_umap_2d = umap_2d.fit_transform(all_embeddings)
 with open("best_clustering.pkl", "wb") as f:
     pickle.dump((best_k, best_labels), f)
 
-# Step 4: Visualize with best KMeans labels
+# Step 4: Visualize with best Birch labels
 plt.figure(figsize=(10, 7))
 scatter = plt.scatter(emb_umap_2d[:, 0], emb_umap_2d[:, 1], c=best_labels, cmap='tab20', s=50, edgecolor='k')
 for i, label in enumerate(ground_truth_labels):
