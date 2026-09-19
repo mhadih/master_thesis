@@ -22,6 +22,10 @@ my_ccbert/models/ccbert_small.bin-avg
 my_ccbert/cpp_traces.csv
 my_ccbert/uer/targets/code_changes_with_edits_all_pretrain_corpus.txt
 
+# CC2Vec weights + dictionary (29MB + 3MB, Zenodo record 3965149)
+cc2vec/openstack_cc2ftr.pt
+cc2vec/openstack_dict.pkl
+
 # IDE / OS
 .vscode/
 .idea/
