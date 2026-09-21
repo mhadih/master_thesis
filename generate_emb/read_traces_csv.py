@@ -43,8 +43,9 @@ def load_traces(csv_path, target_users, chunksize=200000):
     if not chunks:
         return {}
     df_filtered = pl.concat(chunks, how="vertical")
+    # NOTE: group_by yields 1-tuple keys for a single key column — unwrap them.
     return {
-        uid: group
+        (uid[0] if isinstance(uid, tuple) else uid): group
         for uid, group in df_filtered.group_by("user_id", maintain_order=True)
     }
 
