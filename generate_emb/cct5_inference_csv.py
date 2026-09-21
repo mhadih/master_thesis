@@ -20,11 +20,15 @@ Env vars:
 import difflib
 import json
 import os
+import sys
 
-import pandas as pd
+import polars as pl
 import torch
 from tqdm import tqdm
 from transformers import RobertaTokenizer, T5ForConditionalGeneration
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from read_traces_csv import load_traces
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_PATH = os.environ.get("CPP_TRACES_CSV", os.path.join(REPO, "my_ccbert", "cpp_traces.csv"))
@@ -103,14 +107,9 @@ if os.path.exists(OUT):
             DONE.add(json.loads(line)["user_id"])
     print("resume: %d users already embedded, skipping" % len(DONE), flush=True)
 
-user_dfs = {}
-for ch in pd.read_csv(CSV_PATH, usecols=["user_id", "filename", "content", "date"],
-                      chunksize=200000, dtype={"user_id": str}, low_memory=False):
-    ch = ch[ch["user_id"].isin(TARGET_USERS)]
-    if ch.empty:
-        continue
-    for uid, grp in ch.groupby("user_id", sort=False):
-        user_dfs.setdefault(uid, []).append(grp)
+# Snapshots via load_traces: {user_id: pl.DataFrame[filename, content, date]}.
+# (pandas-chunked read under the hood — Polars' scanner rejects this file.)
+user_dfs = load_traces(CSV_PATH, TARGET_USERS)
 print("users found:", len(user_dfs), flush=True)
 
 uids = [u for u in sorted(user_dfs, key=int) if u not in DONE]
@@ -119,13 +118,14 @@ if LIMIT:
 n_pairs = 0
 n_done = 0
 for uid in tqdm(uids, desc="Users"):
-    df = pd.concat(user_dfs[uid])
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    df = df.sort_values("date")
+    df = user_dfs[uid].with_columns(
+        # DB timestamps look like '2024-05-09 12:11:43.076000+00:00';
+        # unparseable -> null, sorts last (same as pandas NaT)
+        pl.col("date").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S%.f%z", strict=False)
+    ).sort("date")
     file_reprs, file_lens = [], []
-    for fn, fdf in df.groupby("filename", sort=False):
-        fdf = fdf.reset_index(drop=True)
-        contents = [c if isinstance(c, str) else "" for c in fdf["content"].tolist()]
+    for _fn, fdf in df.group_by("filename", maintain_order=True):
+        contents = fdf["content"].fill_null("").to_list()
         diffs = []
         for i in range(1, len(contents)):
             if not contents[i - 1].strip() or not contents[i].strip():
