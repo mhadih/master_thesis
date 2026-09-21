@@ -29,8 +29,17 @@ from transformers import RobertaTokenizer, T5ForConditionalGeneration
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_PATH = os.environ.get("CPP_TRACES_CSV", os.path.join(REPO, "my_ccbert", "cpp_traces.csv"))
 CCT5_DIR = os.environ.get("CCT5_DIR", os.path.join(REPO, "cct5"))
-TARGET_FILE = os.path.join(REPO, "student_embeddings", "user_CodeT5_file_embeddings.jsonl")
-TARGET_USERS = {json.loads(l)["user_id"] for l in open(TARGET_FILE)}
+# S03 target users (= user_ids in student_embeddings/user_CodeT5_file_embeddings.jsonl,
+# inlined here so other code can reuse them without reading that file).
+TARGET_USERS = {
+    "7", "49", "75", "77", "83", "142", "143", "145", "146", "148", "150", "154",
+    "159", "160", "162", "163", "164", "165", "166", "167", "169", "175", "179",
+    "180", "181", "182", "183", "184", "189", "191", "195", "198", "199", "204",
+    "205", "212", "218", "219", "222", "223", "227", "229", "230", "231", "232",
+    "233", "234", "238", "240", "242", "243", "245", "247", "248", "249", "250",
+    "252", "255", "259", "261", "262", "267", "269", "273", "279", "281", "283",
+    "284",
+}
 MAX_LENGTH = 512
 BATCH = int(os.environ.get("CCT5_BATCH", "16"))
 LIMIT = int(os.environ.get("CCT5_LIMIT_USERS", "0"))
