@@ -26,7 +26,7 @@ from collections import defaultdict
 import torch
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-STORE = os.environ.get("ABL_STORE", "/tmp/opencode/s03run_abl/cc2v_file_changes.pt")
+STORE = os.environ.get("ABL_STORE", os.path.join(REPO, "data", "cc2v_file_changes.pt"))
 OUTDIR = os.environ.get("ABL_OUTDIR", os.path.join(REPO, "student_embeddings"))
 K = int(os.environ.get("ABL_LAST_K", "5"))
 

@@ -31,6 +31,9 @@ cct5/pytorch_model.bin
 cct5/model.safetensors
 cct5.zip
 
+# CC2Vec per-file change store (90MB derived artifact, regenerable)
+data/cc2v_file_changes.pt
+
 # IDE / OS
 .vscode/
 .idea/
