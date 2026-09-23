@@ -29,6 +29,7 @@ cc2vec/openstack_dict.pkl
 # CCT5 pre-training checkpoint (~850MB, clouds125/tfm_reproduction_CCT5)
 cct5/pytorch_model.bin
 cct5/model.safetensors
+cct5.zip
 
 # IDE / OS
 .vscode/
