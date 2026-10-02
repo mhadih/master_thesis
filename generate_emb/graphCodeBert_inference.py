@@ -215,6 +215,22 @@ def encode_snapshot_plain(code):
     return torch.cat([cls, cls, cls]).cpu(), False
 
 
+# Path to save embeddings (separate file: DFG-guided 2304-d vectors;
+# user_GraphCodeBert_embeddings.jsonl holds the earlier plain 768-d run)
+output_file = "user_GraphCodeBert_dfg_embeddings.jsonl"
+
+# Resume support: already-embedded users are skipped (incremental append below),
+# so killing the run (or shutting down) loses at most the in-flight user.
+DONE = set()
+if os.path.exists(output_file):
+    with open(output_file) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                DONE.add(json.loads(line)["user_id"])
+    print("resume: %d users already embedded, skipping" % len(DONE), flush=True)
+
+
 # Storage for user embeddings
 user_embeddings = defaultdict(list)
 lengths = defaultdict(list)
@@ -235,7 +251,18 @@ for (user_id, filename), group in tqdm(grouped, desc="Processing groups", unit="
         content = row["content"]
         if not isinstance(content, str) or not content.strip():
             continue
-        vec, used = encode_snapshot(content)
+        try:
+            vec, used = encode_snapshot(content)
+        except RuntimeError as e:
+            # transient CUDA failure (2GB card): clear state, log, skip snapshot
+            print("snapshot failed (%s/%s): %s" % (user_id, filename, str(e).splitlines()[0][:120]), flush=True)
+            try:
+                torch.cuda.empty_cache()
+            except Exception:
+                pass
+            with open("skipped_snapshots.log", "a") as sf:
+                sf.write("%s\t%s\t%s\n" % (user_id, filename, row.get("date", "")))
+            continue
         snaps.append(vec)
         if validated < VALIDATE_N and used:
             plain, _ = encode_snapshot_plain(content)
@@ -262,21 +289,6 @@ for user_id, emb_list in user_embeddings.items():
     final_user_embeddings[user_id] = torch.sum(
         weights[:, None] * torch.stack(emb_list), dim=0
     )  # shape: (2304,)
-
-# Path to save embeddings (separate file: DFG-guided 2304-d vectors;
-# user_GraphCodeBert_embeddings.jsonl holds the earlier plain 768-d run)
-output_file = "user_GraphCodeBert_dfg_embeddings.jsonl"
-
-# Resume support: already-embedded users are skipped (incremental append below),
-# so killing the run (or shutting down) loses at most the in-flight user.
-DONE = set()
-if os.path.exists(output_file):
-    with open(output_file) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                DONE.add(json.loads(line)["user_id"])
-    print("resume: %d users already embedded, skipping" % len(DONE), flush=True)
 
 with open(output_file, 'a') as f:  # append: each run adds newly finished users
     for user_id, emb in final_user_embeddings.items():
