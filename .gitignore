@@ -46,3 +46,8 @@ data/cc2v_file_changes.pt
 
 # Environment / secrets (local credentials, never commit)
 .env
+
+# Identifiable student grade details (privacy: keep local, never commit)
+gradesheets/APS03_CA6_integrated_details.csv
+gradesheets/APS03_CA6_phase1_details.csv
+gradesheets/APS03_CA6_phase2_details.csv
