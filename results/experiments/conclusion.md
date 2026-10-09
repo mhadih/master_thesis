@@ -69,6 +69,16 @@
    only aggregates.
 6. The k=20 headline cell (exp_038) is near-1:1 matching territory — an
    upper-bound demonstration pending the fixed-bin re-evaluation.
+7. **Inference cost of data-flow models.** Feeding every snapshot with its data
+   flow through GraphCodeBERT (tree-sitter parse + DFG walk + BPE alignment +
+   graph-guided forward per snapshot) or CCT5 (DFG per hunk + T5 forward per
+   hunk) costs roughly 10–50× a plain encoding pass: a full-corpus DFG run
+   managed ~13 file-groups in 13 minutes before termination (≈1 min/group
+   projected to 30–50 h total), versus minutes for the equivalent plain run.
+   All DFG experiments therefore ran on the 68-user subset, and the 2 GB
+   local GPU additionally forced batch-size 8–32 plus Kaggle offload for the
+   heaviest jobs (CCT5 ~120k diffs, CCBERT ~120k pairs/3.4 h). Runtimes, not
+   methodology, bound the corpus size here — a stated limit on generalizability.
 
 ## 4. Future work
 
