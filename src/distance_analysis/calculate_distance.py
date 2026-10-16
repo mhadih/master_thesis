@@ -7,7 +7,7 @@ import seaborn as sns
 import csv
 import pickle
 
-embeddings_filename = "user_CodeT5_file_embeddings.jsonl"
+embeddings_filename = "user_CodeBert_file_embeddings.jsonl"
 grades_filename = "user_grades.csv"
 output_csv_filename = "student_distance_matrix.csv"
 output_figure_filename = "student_distance_matrix.png"
